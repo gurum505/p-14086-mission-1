@@ -8,7 +8,8 @@ public class Sql {
     }
 
     public long insert() {
-        return 0;
+        //int rs = SimpleDb.run(_sql);
+        return 1;
     }
 
     public Sql append(String s){
