@@ -1,0 +1,1 @@
+rootProject.name = "SimpleDbProject-1"
