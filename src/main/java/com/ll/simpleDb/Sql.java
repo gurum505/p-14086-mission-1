@@ -68,4 +68,8 @@ public class Sql {
 
         return simpleDb.selectDateTime(this);
     }
+
+    public Long selectLong() {
+        return simpleDb.selectLong(this);
+    }
 }

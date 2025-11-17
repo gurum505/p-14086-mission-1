@@ -154,4 +154,21 @@ public class SimpleDb {
         }
         return ldt;
     }
+
+    public Long selectLong(Sql _sql) {
+        long cnt = 0L;
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            while (rs.next()) {
+                cnt++;
+            }
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return cnt;
+    }
 }
