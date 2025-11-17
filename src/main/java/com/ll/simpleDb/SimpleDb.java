@@ -116,4 +116,20 @@ public class SimpleDb {
     }
 
 
+    public Map<String, Object> selectRow(Sql _sql) {
+        Map<String, Object> row = new HashMap<>();
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSetMetaData rsmd = rs.getMetaData();
+            if (rs.next()) {
+                row.put(rsmd.getColumnName(1), rs.getObject(1));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return row;
+    }
 }
