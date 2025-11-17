@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 public class SimpleDb {
     private final String localhost;
@@ -22,23 +23,43 @@ public class SimpleDb {
                 "?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul";
     }
 
-    public void connect(String sql) {
+    public int run(Sql _sql) {
+        return execute(_sql);
+    }
+
+    public int execute(Sql _sql) {
+        int rs = 0;
         try (Connection conn = DriverManager.getConnection(url, username, password);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            int rs = pstmt.executeUpdate();
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+            List<Object> _sqlParams = _sql.get_values();
+            for(int i = 1; i < _sqlParams.size() ;i++){
+                Object arg = _sqlParams.get(i);
+                if (arg instanceof String){
+                    pstmt.setString(i,(String)arg);
+                }else if( arg instanceof Integer){
+                    pstmt.setInt(i,(int)arg);
+                }
+            }
+            rs = pstmt.executeUpdate();
 
         } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+        return rs;
     }
 
-
-    public void setDevMode(boolean b) {
+    //test
+    public int run(String _sql) {
+        int rs = 0;
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql)) {
+            rs = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return rs;
     }
-
-    public void run(String s) {
-        connect(s);
-    }
-
+    //test
     public void run(String sql, String title, String body, boolean isBlind) {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -49,12 +70,17 @@ public class SimpleDb {
             int rs = pstmt.executeUpdate();
 
         } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public Sql genSql() {
 
-        return new Sql("");
+    public void setDevMode(boolean b) {
+
+    }
+
+    public Sql genSql() {
+        return new Sql(this);
     }
 
 
