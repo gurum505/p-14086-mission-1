@@ -17,9 +17,9 @@ public class Sql {
         return new Sql(_sql);
     }
 
-    public Sql append(String s1,String s2){
+    public Sql append(String s1,String[] args){
         _sql += s1;
-        _sql += s2;
+        //_sql += s2;
         return new Sql(_sql);
     }
 
