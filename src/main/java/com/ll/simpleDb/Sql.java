@@ -72,4 +72,8 @@ public class Sql {
     public Long selectLong() {
         return simpleDb.selectLong(this);
     }
+
+    public String selectString() {
+        return simpleDb.selectString(this);
+    }
 }
