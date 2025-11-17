@@ -24,7 +24,6 @@ public class Sql {
     }
 
     public Sql append(String sql) {
-        // 공백 누락 방지: 이전 문자열 끝에 공백이 없고, 추가할 문자열 앞에 공백이 없다면 공백 추가
         if (!_sql.isEmpty() && !sql.startsWith(" ") && !_sql.toString().endsWith(" ")) {
             _sql.append(" ");
         }
@@ -33,12 +32,19 @@ public class Sql {
     }
 
     public Sql append(String sql, Object... params) {
-        append(sql); // 1번 메서드를 호출하여 SQL 문자열과 공백을 안전하게 추가
-
-        // 파라미터 값을 리스트에 추가 (JDBC 바인딩을 위한 준비)
+        append(sql);
         if (params != null) {
             this._values.addAll(Arrays.asList(params));
         }
+        return this;
+    }
+
+    public Sql appendIn(String sql, Object... params) {
+        if (params != null) {
+            sql = sql.replaceFirst("\\?", "?,?,?");
+            this._values.addAll(Arrays.asList(params));
+        }
+        append(sql);
         return this;
     }
 
