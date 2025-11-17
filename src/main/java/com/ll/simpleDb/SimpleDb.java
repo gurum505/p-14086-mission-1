@@ -1,10 +1,10 @@
 package com.ll.simpleDb;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SimpleDb {
     private final String localhost;
@@ -46,6 +46,38 @@ public class SimpleDb {
             throw new RuntimeException(e);
         }
         return rs;
+    }
+
+    public List<Map<String,Object>> selectRows(Sql _sql) {
+        List<Map<String,Object>> data = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            List<Object> _sqlParams = _sql.get_values();
+            for(int i = 1; i < _sqlParams.size() ;i++){
+                Object arg = _sqlParams.get(i);
+                if (arg instanceof String){
+                    pstmt.setString(i,(String)arg);
+                }else if( arg instanceof Integer){
+                    pstmt.setInt(i,(int)arg);
+                }
+            }
+            ResultSet rs = pstmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            rs  = pstmt.executeQuery(_sql.get_sql());
+
+            while (rs.next()){
+                Map<String,Object> row = new HashMap<>();
+                for ( int i= 0 ; i<= rsmd.getColumnCount() ; i++){
+                    row.put(rsmd.getColumnName(i),rs.getObject(i));
+                }
+                data.add(row);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return data;
     }
 
     //test

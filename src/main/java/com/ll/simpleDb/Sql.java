@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -54,4 +55,7 @@ public class Sql {
     }
 
 
+    public List<Map<String, Object>> selectRows() {
+        return simpleDb.selectRows(this);
+    }
 }
