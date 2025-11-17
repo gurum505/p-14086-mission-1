@@ -32,12 +32,12 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
             List<Object> _sqlParams = _sql.get_values();
-            for(int i = 1; i < _sqlParams.size() ;i++){
+            for (int i = 1; i < _sqlParams.size(); i++) {
                 Object arg = _sqlParams.get(i);
-                if (arg instanceof String){
-                    pstmt.setString(i,(String)arg);
-                }else if( arg instanceof Integer){
-                    pstmt.setInt(i,(int)arg);
+                if (arg instanceof String) {
+                    pstmt.setString(i, (String) arg);
+                } else if (arg instanceof Integer) {
+                    pstmt.setInt(i, (int) arg);
                 }
             }
             rs = pstmt.executeUpdate();
@@ -48,29 +48,28 @@ public class SimpleDb {
         return rs;
     }
 
-    public List<Map<String,Object>> selectRows(Sql _sql) {
-        List<Map<String,Object>> data = new ArrayList<>();
+    public List<Map<String, Object>> selectRows(Sql _sql) {
+        List<Map<String, Object>> data = new ArrayList<>();
 
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
             List<Object> _sqlParams = _sql.get_values();
-            for(int i = 1; i < _sqlParams.size() ;i++){
+            for (int i = 1; i < _sqlParams.size(); i++) {
                 Object arg = _sqlParams.get(i);
-                if (arg instanceof String){
-                    pstmt.setString(i,(String)arg);
-                }else if( arg instanceof Integer){
-                    pstmt.setInt(i,(int)arg);
+                if (arg instanceof String) {
+                    pstmt.setString(i, (String) arg);
+                } else if (arg instanceof Integer) {
+                    pstmt.setInt(i, (int) arg);
                 }
             }
-            ResultSet rs = pstmt.executeQuery();
+            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
             ResultSetMetaData rsmd = rs.getMetaData();
-            rs  = pstmt.executeQuery(_sql.get_sql());
 
-            while (rs.next()){
-                Map<String,Object> row = new HashMap<>();
-                for ( int i= 0 ; i<= rsmd.getColumnCount() ; i++){
-                    row.put(rsmd.getColumnName(i),rs.getObject(i));
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    row.put(rsmd.getColumnName(i), rs.getObject(i));
                 }
                 data.add(row);
             }
@@ -91,13 +90,14 @@ public class SimpleDb {
         }
         return rs;
     }
+
     //test
     public void run(String sql, String title, String body, boolean isBlind) {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1,title);
-            pstmt.setString(2,body);
-            pstmt.setBoolean(3,isBlind);
+            pstmt.setString(1, title);
+            pstmt.setString(2, body);
+            pstmt.setBoolean(3, isBlind);
 
             int rs = pstmt.executeUpdate();
 
