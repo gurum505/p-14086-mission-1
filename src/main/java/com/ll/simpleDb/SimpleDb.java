@@ -124,7 +124,9 @@ public class SimpleDb {
             ResultSet rs = pstmt.executeQuery(_sql.get_sql());
             ResultSetMetaData rsmd = rs.getMetaData();
             if (rs.next()) {
-                row.put(rsmd.getColumnName(1), rs.getObject(1));
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    row.put(rsmd.getColumnName(i), rs.getObject(i));
+                }
             }
 
         } catch (SQLException e) {
