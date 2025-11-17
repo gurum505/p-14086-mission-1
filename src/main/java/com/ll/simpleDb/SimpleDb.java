@@ -189,4 +189,22 @@ public class SimpleDb {
         }
         return s;
     }
+
+    public Boolean selectBoolean(Sql _sql) {
+        Boolean b = null;
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            while (rs.next()) {
+                if (rs.getObject(1) instanceof Boolean) {
+                    b = (Boolean) rs.getObject(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return b;
+    }
 }

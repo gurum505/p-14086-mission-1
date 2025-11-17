@@ -76,4 +76,8 @@ public class Sql {
     public String selectString() {
         return simpleDb.selectString(this);
     }
+
+    public Boolean selectBoolean() {
+        return simpleDb.selectBoolean(this);
+    }
 }
