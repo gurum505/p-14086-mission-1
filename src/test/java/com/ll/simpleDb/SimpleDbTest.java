@@ -371,6 +371,7 @@ class SimpleDbTest {
         ORDER BY id ASC
         LIMIT 3
         */
+        //ORM하라는 얘기지? aritcle가지고
         sql.append("SELECT * FROM article ORDER BY id ASC LIMIT 3");
         List<Article> articleRows = sql.selectRows(Article.class);
 
