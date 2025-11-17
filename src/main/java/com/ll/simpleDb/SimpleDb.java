@@ -1,6 +1,7 @@
 package com.ll.simpleDb;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -133,5 +134,24 @@ public class SimpleDb {
             throw new RuntimeException(e);
         }
         return row;
+    }
+
+    public LocalDateTime selectDateTime(Sql _sql) {
+        LocalDateTime ldt = null;
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSetMetaData rsmd = rs.getMetaData();
+            if (rs.next()) {
+                if (rs.getObject(1) instanceof LocalDateTime) {
+                    ldt = (LocalDateTime) rs.getObject(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ldt;
     }
 }

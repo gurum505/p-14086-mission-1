@@ -3,6 +3,7 @@ package com.ll.simpleDb;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,5 +62,10 @@ public class Sql {
 
     public Map<String, Object> selectRow() {
         return simpleDb.selectRow(this);
+    }
+
+    public LocalDateTime selectDatetime() {
+
+        return simpleDb.selectDateTime(this);
     }
 }
