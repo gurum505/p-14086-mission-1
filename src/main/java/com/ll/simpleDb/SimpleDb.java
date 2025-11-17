@@ -216,4 +216,35 @@ public class SimpleDb {
         }
         return b;
     }
+
+    public List<Long> selectLongs(Sql _sql) {
+        List<Long> cnt = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            List<Object> _sqlParams = _sql.get_values();
+            for (int i = 1; i < _sqlParams.size(); i++) {
+                Object arg = _sqlParams.get(i);
+                if (arg instanceof String) {
+                    pstmt.setString(i, (String) arg);
+                } else if (arg instanceof Integer) {
+                    pstmt.setInt(i, (int) arg);
+                } else if (arg instanceof Long) {
+                    pstmt.setLong(i, (long) arg);
+                }
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    cnt.add(rs.getLong(i));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return cnt;
+    }
 }

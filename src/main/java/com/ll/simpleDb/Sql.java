@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Setter
 @Getter
@@ -41,7 +38,7 @@ public class Sql {
 
     public Sql appendIn(String sql, Object... params) {
         if (params != null) {
-            sql = sql.replaceFirst("\\?", "?,?,?");
+            sql = sql.replaceFirst("\\?", String.join(",", Collections.nCopies(params.length, "?")));
             this._values.addAll(Arrays.asList(params));
         }
         append(sql);
@@ -102,5 +99,9 @@ public class Sql {
 
     public String get_sql() {
         return _sql.toString();
+    }
+
+    public List<Long> selectLongs() {
+        return simpleDb.selectLongs(this);
     }
 }
