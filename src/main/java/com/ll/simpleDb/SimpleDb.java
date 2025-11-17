@@ -179,9 +179,7 @@ public class SimpleDb {
 
             ResultSet rs = pstmt.executeQuery(_sql.get_sql());
             while (rs.next()) {
-                if (rs.getObject(1) instanceof String) {
-                    s = (String) rs.getObject(1);
-                }
+                s = rs.getString(1);
             }
 
         } catch (SQLException e) {
@@ -197,9 +195,7 @@ public class SimpleDb {
 
             ResultSet rs = pstmt.executeQuery(_sql.get_sql());
             while (rs.next()) {
-                if (rs.getObject(1) instanceof Boolean) {
-                    b = (Boolean) rs.getObject(1);
-                }
+                b = rs.getBoolean(1);
             }
 
         } catch (SQLException e) {
