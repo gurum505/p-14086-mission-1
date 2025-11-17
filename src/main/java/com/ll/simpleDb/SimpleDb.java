@@ -33,6 +33,7 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
             List<Object> _sqlParams = _sql.get_values();
+
             for (int i = 1; i < _sqlParams.size(); i++) {
                 Object arg = _sqlParams.get(i);
                 if (arg instanceof String) {
@@ -41,6 +42,7 @@ public class SimpleDb {
                     pstmt.setInt(i, (int) arg);
                 }
             }
+
             rs = pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -64,7 +66,8 @@ public class SimpleDb {
                     pstmt.setInt(i, (int) arg);
                 }
             }
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+
+            ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
 
             while (rs.next()) {
@@ -122,7 +125,7 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             if (rs.next()) {
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -141,7 +144,7 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             if (rs.next()) {
                 if (rs.getObject(1) instanceof LocalDateTime) {
@@ -160,9 +163,19 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
-            while (rs.next()) {
-                cnt++;
+            List<Object> _sqlParams = _sql.get_values();
+            for (int i = 1; i < _sqlParams.size(); i++) {
+                Object arg = _sqlParams.get(i);
+                if (arg instanceof String) {
+                    pstmt.setString(i, (String) arg);
+                } else if (arg instanceof Integer) {
+                    pstmt.setInt(i, (int) arg);
+                }
+            }
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                cnt = rs.getLong(1);
             }
 
 
@@ -177,7 +190,7 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 s = rs.getString(1);
             }
@@ -193,7 +206,7 @@ public class SimpleDb {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
-            ResultSet rs = pstmt.executeQuery(_sql.get_sql());
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 b = rs.getBoolean(1);
             }

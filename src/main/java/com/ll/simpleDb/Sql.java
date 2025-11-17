@@ -13,19 +13,32 @@ import java.util.Map;
 @Getter
 public class Sql {
     private final SimpleDb simpleDb;
-    private String _sql;
+    private StringBuilder _sql;
     private List<Object> _values;
 
     public Sql(SimpleDb simpleDb) {
         this.simpleDb = simpleDb;
-        this._sql = "";
+        this._sql = new StringBuilder();
         this._values = new ArrayList<>();
         this._values.add(null);
     }
 
-    public Sql append(String s1, Object... args) {
-        _sql += s1 + " ";
-        _values.addAll(Arrays.asList(args));
+    public Sql append(String sql) {
+        // 공백 누락 방지: 이전 문자열 끝에 공백이 없고, 추가할 문자열 앞에 공백이 없다면 공백 추가
+        if (!_sql.isEmpty() && !sql.startsWith(" ") && !_sql.toString().endsWith(" ")) {
+            _sql.append(" ");
+        }
+        _sql.append(sql);
+        return this;
+    }
+
+    public Sql append(String sql, Object... params) {
+        append(sql); // 1번 메서드를 호출하여 SQL 문자열과 공백을 안전하게 추가
+
+        // 파라미터 값을 리스트에 추가 (JDBC 바인딩을 위한 준비)
+        if (params != null) {
+            this._values.addAll(Arrays.asList(params));
+        }
         return this;
     }
 
@@ -79,5 +92,9 @@ public class Sql {
 
     public Boolean selectBoolean() {
         return simpleDb.selectBoolean(this);
+    }
+
+    public String get_sql() {
+        return _sql.toString();
     }
 }
