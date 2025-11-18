@@ -87,6 +87,10 @@ public class Sql {
         return simpleDb.selectRow(this);
     }
 
+    public <T> T selectRow(Class<T> cls) {
+        return (T) new Article(simpleDb.selectRow(this));
+    }
+
     public LocalDateTime selectDatetime() {
 
         return simpleDb.selectDateTime(this);
