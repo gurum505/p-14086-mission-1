@@ -56,10 +56,11 @@ public class SimpleDb {
                 setParam(pstmt, i + 1, params[i]);
             }
             rs = pstmt.executeUpdate();
-            close();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
         return rs;
     }
@@ -88,10 +89,11 @@ public class SimpleDb {
                     row.put(rsmd.getColumnName(i), rs.getObject(i));
                 }
             }
-            close();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
         return row;
     }
@@ -118,10 +120,10 @@ public class SimpleDb {
                 data.add(row);
             }
 
-            close();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
         return data;
     }
@@ -136,11 +138,10 @@ public class SimpleDb {
             if (rs.next()) {
                 object = rs.getObject(1);
             }
-
-            close();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
         return object;
     }
@@ -162,22 +163,16 @@ public class SimpleDb {
                     cnt.add(rs.getLong(i));
                 }
             }
-
-            close();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
         return cnt;
     }
 
     public void close() {
-        try {
-            Connection conn = connections.remove(Thread.currentThread().getName());
-            conn.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        connections.remove(Thread.currentThread().getName());
     }
 
     public void startTransaction() {
