@@ -47,39 +47,15 @@ public class Sql {
     }
 
     public long insert() {
-//        System.out.println("== rawSql ==");
-//        System.out.println(_sql);
         return (long) simpleDb.run(this);
     }
 
     public int update() {
-//        System.out.println("== rawSql ==");
-//        System.out.println(_sql);
         return simpleDb.run(this);
     }
 
     public int delete() {
-//        System.out.println("== rawSql ==");
-//        System.out.println(_sql);
         return simpleDb.run(this);
-    }
-
-    public String getParamString(int index) {
-        return String.valueOf(_values.get(index));
-    }
-
-    public int getParamInt(int index) {
-        return Integer.parseInt(String.valueOf(_values.get(index)));
-    }
-
-
-    public List<Map<String, Object>> selectRows() {
-        return simpleDb.selectRows(this);
-    }
-
-    public <T> List<T> selectRows(Class<T> cls) {
-        return simpleDb.selectRows(this)
-                .stream().map(row -> (T) new Article(row)).collect(Collectors.toList());
     }
 
     public Map<String, Object> selectRow() {
@@ -87,10 +63,45 @@ public class Sql {
     }
 
     public <T> T selectRow(Class<T> cls) {
-        return (T) new Article(simpleDb.selectRow(this));
+        if (cls == Article.class) {
+            return cls.cast(new Article(simpleDb.selectRow(this)));
+        }
+        return null;
     }
 
-    public <T> T selectSingle(Class<T> cls) {
+    public List<Map<String, Object>> selectRows() {
+        return simpleDb.selectRows(this);
+    }
+
+    public <T> List<T> selectRows(Class<T> cls) {
+        if (cls == Article.class) {
+            return simpleDb.selectRows(this)
+                    .stream().map(row -> cls.cast(new Article(row))).toList();
+        }
+        return null;
+    }
+
+    public LocalDateTime selectDatetime() {
+        return selectSingle(LocalDateTime.class);
+    }
+
+    public String selectString() {
+        return selectSingle(String.class);
+    }
+
+    public Boolean selectBoolean() {
+        return selectSingle(Boolean.class);
+    }
+
+    public Long selectLong() {
+        return selectSingle(Long.class);
+    }
+
+    public List<Long> selectLongs() {
+        return simpleDb.selectLongs(this);
+    }
+
+    private <T> T selectSingle(Class<T> cls) {
         Object object = simpleDb.selectSingle(this);
         if (cls == Boolean.class && object instanceof Number) {
             return ((Number) object).intValue() == 1 ? (T) Boolean.TRUE : (T) Boolean.FALSE;
@@ -101,31 +112,7 @@ public class Sql {
         return null;
     }
 
-    public LocalDateTime selectDatetime() {
-        return selectSingle(LocalDateTime.class);
-        //return simpleDb.selectDateTime(this);
-    }
-
-    public Long selectLong() {
-        return selectSingle(Long.class);
-        //return simpleDb.selectLong(this);
-    }
-
-    public String selectString() {
-        return selectSingle(String.class);
-        //return simpleDb.selectString(this);
-    }
-
-    public Boolean selectBoolean() {
-        return selectSingle(Boolean.class);
-        //return simpleDb.selectBoolean(this);
-    }
-
     public String get_sql() {
         return _sql.toString();
-    }
-
-    public List<Long> selectLongs() {
-        return simpleDb.selectLongs(this);
     }
 }
