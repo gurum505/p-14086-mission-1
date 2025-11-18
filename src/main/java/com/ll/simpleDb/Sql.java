@@ -90,21 +90,35 @@ public class Sql {
         return (T) new Article(simpleDb.selectRow(this));
     }
 
-    public LocalDateTime selectDatetime() {
+    public <T> T selectSingle(Class<T> cls) {
+        Object object = simpleDb.selectSingle(this);
+        if (cls == Boolean.class && object instanceof Number) {
+            return ((Number) object).intValue() == 1 ? (T) Boolean.TRUE : (T) Boolean.FALSE;
+        }
+        if (cls.isInstance(object)) {
+            return cls.cast(object);
+        }
+        return null;
+    }
 
-        return simpleDb.selectDateTime(this);
+    public LocalDateTime selectDatetime() {
+        return selectSingle(LocalDateTime.class);
+        //return simpleDb.selectDateTime(this);
     }
 
     public Long selectLong() {
-        return simpleDb.selectLong(this);
+        return selectSingle(Long.class);
+        //return simpleDb.selectLong(this);
     }
 
     public String selectString() {
-        return simpleDb.selectString(this);
+        return selectSingle(String.class);
+        //return simpleDb.selectString(this);
     }
 
     public Boolean selectBoolean() {
-        return simpleDb.selectBoolean(this);
+        return selectSingle(Boolean.class);
+        //return simpleDb.selectBoolean(this);
     }
 
     public String get_sql() {

@@ -132,82 +132,21 @@ public class SimpleDb {
         return row;
     }
 
-    public LocalDateTime selectDateTime(Sql _sql) {
-        LocalDateTime ldt = null;
+    public Object selectSingle(Sql _sql) {
+        Object object = null;
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
             ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             if (rs.next()) {
-                if (rs.getObject(1) instanceof LocalDateTime) {
-                    ldt = (LocalDateTime) rs.getObject(1);
-                }
+                object = rs.getObject(1);
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return ldt;
-    }
-
-    public Long selectLong(Sql _sql) {
-        long cnt = 0L;
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            List<Object> _sqlParams = _sql.get_values();
-            for (int i = 1; i < _sqlParams.size(); i++) {
-                Object arg = _sqlParams.get(i);
-                if (arg instanceof String) {
-                    pstmt.setString(i, (String) arg);
-                } else if (arg instanceof Integer) {
-                    pstmt.setInt(i, (int) arg);
-                }
-            }
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                cnt = rs.getLong(1);
-            }
-
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return cnt;
-    }
-
-    public String selectString(Sql _sql) {
-        String s = "";
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                s = rs.getString(1);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return s;
-    }
-
-    public Boolean selectBoolean(Sql _sql) {
-        Boolean b = null;
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                b = rs.getBoolean(1);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return b;
+        return object;
     }
 
     public List<Long> selectLongs(Sql _sql) {
