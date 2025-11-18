@@ -246,4 +246,7 @@ public class SimpleDb {
         }
         return cnt;
     }
+
+    public void close() {
+    }
 }
