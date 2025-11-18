@@ -24,6 +24,14 @@ public class SimpleDb {
                 "?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul";
     }
 
+    public void setDevMode(boolean b) {
+
+    }
+
+    public Sql genSql() {
+        return new Sql(this);
+    }
+
     public int run(Sql _sql) {
         return execute(_sql);
     }
@@ -82,8 +90,8 @@ public class SimpleDb {
         }
         return data;
     }
-
     //test
+
     public int run(String _sql) {
         int rs = 0;
         try (Connection conn = DriverManager.getConnection(url, username, password);
@@ -94,8 +102,8 @@ public class SimpleDb {
         }
         return rs;
     }
-
     //test
+
     public void run(String sql, String title, String body, boolean isBlind) {
         try (Connection conn = DriverManager.getConnection(url, username, password);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -108,15 +116,6 @@ public class SimpleDb {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    public void setDevMode(boolean b) {
-
-    }
-
-    public Sql genSql() {
-        return new Sql(this);
     }
 
 

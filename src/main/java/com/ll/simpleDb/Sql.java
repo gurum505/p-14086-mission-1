@@ -1,10 +1,12 @@
 package com.ll.simpleDb;
 
+import com.ll.Article;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -74,6 +76,11 @@ public class Sql {
 
     public List<Map<String, Object>> selectRows() {
         return simpleDb.selectRows(this);
+    }
+
+    public <T> List<T> selectRows(Class<T> cls) {
+        return simpleDb.selectRows(this)
+                .stream().map(row -> (T) new Article(row)).collect(Collectors.toList());
     }
 
     public Map<String, Object> selectRow() {
