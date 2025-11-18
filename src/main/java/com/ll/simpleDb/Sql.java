@@ -19,7 +19,6 @@ public class Sql {
         this.simpleDb = simpleDb;
         this._sql = new StringBuilder();
         this._values = new ArrayList<>();
-        this._values.add(null);
     }
 
     public Sql append(String sql) {
@@ -50,7 +49,7 @@ public class Sql {
     public long insert() {
 //        System.out.println("== rawSql ==");
 //        System.out.println(_sql);
-        return simpleDb.run(this);
+        return (long) simpleDb.run(this);
     }
 
     public int update() {
