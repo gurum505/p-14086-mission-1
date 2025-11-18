@@ -249,4 +249,14 @@ public class SimpleDb {
 
     public void close() {
     }
+
+    public void startTransaction() {
+        
+    }
+
+    public void rollback() {
+    }
+
+    public void commit() {
+    }
 }
