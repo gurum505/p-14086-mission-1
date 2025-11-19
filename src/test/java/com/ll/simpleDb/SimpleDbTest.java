@@ -536,5 +536,63 @@ class SimpleDbTest {
         assertThat(newCount).isEqualTo(oldCount + 1);
     }
 
+    // 테스트 추가
+    @Test
+    @DisplayName("use in multi threading : 제모")
+    public void t020() throws InterruptedException {
+        // 쓰레드 풀의 크기를 정의합니다.
+        int numberOfThreads = 10;
 
+        // 고정 크기의 쓰레드 풀을 생성합니다.
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+
+        // 성공한 작업의 수를 세는 원자적 카운터를 생성합니다.
+        AtomicInteger successCounter = new AtomicInteger(0);
+
+        // 동시에 실행되는 작업의 수를 세는 데 사용되는 래치를 생성합니다.
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        for (int i = 0; i < numberOfThreads; i++) {
+
+            int id = i + 1;
+            String title = "제목%d".formatted(i + 1); // String.format 또는 formatted() 사용
+            // 각 쓰레드에서 실행될 작업을 정의합니다.
+            Runnable task = () -> {
+                try {
+                    // SimpleDB에서 SQL 객체를 생성합니다.
+                    Sql sql = simpleDb.genSql();
+
+                    // SQL 쿼리를 작성합니다.
+
+                    sql.append("UPDATE article")
+                            .append("SET title = ?", title)
+                            .append("WHERE id = ?", 1);
+
+                    // 수정된 row 개수
+                    int affectedRowsCount = sql.update();
+
+                    if (affectedRowsCount == 1) {
+                        successCounter.incrementAndGet();
+                    }
+                } finally {
+                    // 커넥션 종료
+                    simpleDb.close();
+                    // 작업이 완료되면 래치 카운터를 감소시킵니다.
+                    latch.countDown();
+                }
+            };
+            executorService.submit(task);
+        }
+
+        // 쓰레드 풀에서 쓰레드를 할당받아 작업을 실행합니다.
+
+        // 모든 작업이 완료될 때까지 대기하거나, 최대 10초 동안 대기합니다.
+        latch.await(10, TimeUnit.SECONDS);
+
+        // 쓰레드 풀을 종료시킵니다.
+        executorService.shutdown();
+
+        // 성공 카운터가 쓰레드 수와 동일한지 확인합니다.
+        assertThat(successCounter.get()).isEqualTo(numberOfThreads);
+    }
 }

@@ -1,6 +1,7 @@
 package com.ll.simpleDb;
 
 import com.ll.Article;
+import com.ll.standard.Util;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -70,25 +71,13 @@ public class Sql {
     // ===================================
 
     public List<Map<String, Object>> selectRows() {
-        return simpleDb.selectCommon(this, resultSet -> {
-            try {
-                return selectRowsMapper(resultSet);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return simpleDb.selectCommon(this, this::selectRowsMapper);
     }
 
     public <T> List<T> selectRows(Class<T> cls) {
         if (cls == Article.class) {
-            return simpleDb.selectCommon(this, resultSet -> {
-                        try {
-                            return selectRowsMapper(resultSet);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .stream().map(row -> cls.cast(new Article(row))).toList();
+            return simpleDb.selectCommon(this, this::selectRowsMapper)
+                    .stream().map(row -> (T) Util.mapper.mapToObj(row, cls)).toList();
         }
         return null;
     }
@@ -102,13 +91,7 @@ public class Sql {
     }
 
     public List<Long> selectLongs() {
-        return simpleDb.selectCommon(this, resultSet -> {
-            try {
-                return selectLongsMapper(resultSet);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return simpleDb.selectCommon(this, this::selectLongsMapper);
     }
 
     public Long selectLong() {
@@ -132,14 +115,9 @@ public class Sql {
     // simpleDb.selectCommon 에 사용되는 Mapper
     // <T> T selectSingle
     // ===================================
+
     private <T> T selectSingle(Class<T> cls) {
-        Object object = simpleDb.selectCommon(this, (resultSet -> {
-            try {
-                return selectSingleMapper(resultSet);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }));
+        Object object = simpleDb.selectCommon(this, this::selectSingleMapper);
 
         if (cls == Boolean.class && object instanceof Number) {
             return ((Number) object).intValue() == 1 ? (T) Boolean.TRUE : (T) Boolean.FALSE;
@@ -150,34 +128,46 @@ public class Sql {
         return null;
     }
 
-    private List<Map<String, Object>> selectRowsMapper(ResultSet rs) throws SQLException {
+    private List<Map<String, Object>> selectRowsMapper(ResultSet rs) {
         List<Map<String, Object>> data = new ArrayList<>();
-        ResultSetMetaData rsmd = rs.getMetaData();
-        while (rs.next()) {
-            Map<String, Object> row = new HashMap<>();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                row.put(rsmd.getColumnName(i), rs.getObject(i));
+        try {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    row.put(rsmd.getColumnName(i), rs.getObject(i));
+                }
+                data.add(row);
             }
-            data.add(row);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return data;
     }
 
-    private List<Long> selectLongsMapper(ResultSet rs) throws SQLException {
+    private List<Long> selectLongsMapper(ResultSet rs) {
         List<Long> cnt = new ArrayList<>();
-        ResultSetMetaData rsmd = rs.getMetaData();
-        while (rs.next()) {
-            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                cnt.add(rs.getLong(i));
+        try {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    cnt.add(rs.getLong(i));
+                }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return cnt;
     }
 
-    private Object selectSingleMapper(ResultSet rs) throws SQLException {
+    private Object selectSingleMapper(ResultSet rs) {
         Object object = null;
-        if (rs.next()) {
-            object = rs.getObject(1);
+        try {
+            if (rs.next()) {
+                object = rs.getObject(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return object;
     }

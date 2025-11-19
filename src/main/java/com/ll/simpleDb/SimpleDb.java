@@ -35,7 +35,7 @@ public class SimpleDb {
     }
 
     // ===================================
-    // DDL Public API 영역
+    // CREATE, INSERT, DELETE Public API 영역
     // 초기 데이터 생성 및 테스트
     // ===================================
 
@@ -61,7 +61,7 @@ public class SimpleDb {
     }
 
     // ===================================
-    // DML Public API 영역
+    // SELCECT Public API 영역
     // 데이터 조회
     // ===================================
 
