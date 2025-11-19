@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SimpleDb {
     private final String localhost;
@@ -81,8 +82,8 @@ public class SimpleDb {
         }
     }
 
-    public List<Map<String, Object>> selectRows(Sql _sql) {
-        List<Map<String, Object>> data = new ArrayList<>();
+    public <T> T temp(Sql _sql, Function<ResultSet, T> mapper) {
+        T object = null;
         Connection conn = getCurrentThreadConnection();
         try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
@@ -90,41 +91,9 @@ public class SimpleDb {
             for (int i = 0; i < _sqlParams.size(); i++) {
                 setParam(pstmt, i + 1, _sqlParams.get(i));
             }
-
             ResultSet rs = pstmt.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
+            object = mapper.apply(rs);
 
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    row.put(rsmd.getColumnName(i), rs.getObject(i));
-                }
-                data.add(row);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            close();
-        }
-        return data;
-    }
-
-    public Object selectSingle(Sql _sql) {
-        Object object = null;
-        Connection conn = getCurrentThreadConnection();
-        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            List<Object> _sqlParams = _sql.get_values();
-            for (int i = 0; i < _sqlParams.size(); i++) {
-                setParam(pstmt, i + 1, _sqlParams.get(i));
-            }
-
-            ResultSet rs = pstmt.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            if (rs.next()) {
-                object = rs.getObject(1);
-            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -133,27 +102,65 @@ public class SimpleDb {
         return object;
     }
 
+
+    public List<Map<String, Object>> selectRows(Sql _sql) {
+        return temp(_sql, resultSet -> {
+            try {
+                return selectRowsMapper(resultSet);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private List<Map<String, Object>> selectRowsMapper(ResultSet rs) throws SQLException {
+        List<Map<String, Object>> data = new ArrayList<>();
+        ResultSetMetaData rsmd = rs.getMetaData();
+        while (rs.next()) {
+            Map<String, Object> row = new HashMap<>();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                row.put(rsmd.getColumnName(i), rs.getObject(i));
+            }
+            data.add(row);
+        }
+        return data;
+    }
+
+    public Object selectSingle(Sql _sql) {
+        return temp(_sql, (resultSet -> {
+            try {
+                return selectSingleMapper(resultSet);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+    }
+
+    private Object selectSingleMapper(ResultSet rs) throws SQLException {
+        Object object = null;
+        if (rs.next()) {
+            object = rs.getObject(1);
+        }
+        return object;
+    }
+
     public List<Long> selectLongs(Sql _sql) {
+        return temp(_sql, resultSet -> {
+            try {
+                return selectLongsMapper(resultSet);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private List<Long> selectLongsMapper(ResultSet rs) throws SQLException {
         List<Long> cnt = new ArrayList<>();
-        Connection conn = getCurrentThreadConnection();
-        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            List<Object> _sqlParams = _sql.get_values();
-            for (int i = 0; i < _sqlParams.size(); i++) {
-                setParam(pstmt, i + 1, _sqlParams.get(i));
+        ResultSetMetaData rsmd = rs.getMetaData();
+        while (rs.next()) {
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                cnt.add(rs.getLong(i));
             }
-
-            ResultSet rs = pstmt.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            while (rs.next()) {
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    cnt.add(rs.getLong(i));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            close();
         }
         return cnt;
     }
