@@ -27,13 +27,17 @@ public class SimpleDb {
 
     }
 
-    private Connection getCurrentThreadConnection() throws SQLException {
+    private Connection getCurrentThreadConnection() {
         Connection conn = connections.get(Thread.currentThread().getName());
         if (conn != null) {
             return conn;
         }
-        conn = DriverManager.getConnection(this.url, this.username, this.password);
-        connections.put(Thread.currentThread().getName(), conn);
+        try {
+            conn = DriverManager.getConnection(this.url, this.username, this.password);
+            connections.put(Thread.currentThread().getName(), conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return conn;
     }
 
@@ -50,8 +54,8 @@ public class SimpleDb {
 
     public int run(String sql, Object... params) {
         int rs = 0;
-        try (Connection conn = getCurrentThreadConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        Connection conn = getCurrentThreadConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 setParam(pstmt, i + 1, params[i]);
             }
@@ -79,8 +83,8 @@ public class SimpleDb {
 
     public Map<String, Object> selectRow(Sql _sql) {
         Map<String, Object> row = new HashMap<>();
-        try (Connection conn = getCurrentThreadConnection();
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+        Connection conn = getCurrentThreadConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
             ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -89,7 +93,6 @@ public class SimpleDb {
                     row.put(rsmd.getColumnName(i), rs.getObject(i));
                 }
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -100,9 +103,8 @@ public class SimpleDb {
 
     public List<Map<String, Object>> selectRows(Sql _sql) {
         List<Map<String, Object>> data = new ArrayList<>();
-
-        try (Connection conn = getCurrentThreadConnection();
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+        Connection conn = getCurrentThreadConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
             List<Object> _sqlParams = _sql.get_values();
             for (int i = 0; i < _sqlParams.size(); i++) {
@@ -130,8 +132,13 @@ public class SimpleDb {
 
     public Object selectSingle(Sql _sql) {
         Object object = null;
-        try (Connection conn = getCurrentThreadConnection();
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+        Connection conn = getCurrentThreadConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+
+            List<Object> _sqlParams = _sql.get_values();
+            for (int i = 0; i < _sqlParams.size(); i++) {
+                setParam(pstmt, i + 1, _sqlParams.get(i));
+            }
 
             ResultSet rs = pstmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -148,8 +155,8 @@ public class SimpleDb {
 
     public List<Long> selectLongs(Sql _sql) {
         List<Long> cnt = new ArrayList<>();
-        try (Connection conn = getCurrentThreadConnection();
-             PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
+        Connection conn = getCurrentThreadConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
 
             List<Object> _sqlParams = _sql.get_values();
             for (int i = 0; i < _sqlParams.size(); i++) {
@@ -172,16 +179,48 @@ public class SimpleDb {
     }
 
     public void close() {
-        connections.remove(Thread.currentThread().getName());
+        try {
+            Connection conn = getCurrentThreadConnection();
+            if (!conn.getAutoCommit()) {
+                return;
+            }
+            connections.remove(Thread.currentThread().getName());
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void startTransaction() {
-
+        try {
+            Connection conn = getCurrentThreadConnection();
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void rollback() {
+        try {
+            Connection conn = getCurrentThreadConnection();
+            conn.rollback();
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close();
+        }
     }
 
     public void commit() {
+        try {
+            Connection conn = getCurrentThreadConnection();
+            conn.commit();
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close();
+        }
     }
 }
