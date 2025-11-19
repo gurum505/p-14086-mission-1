@@ -537,8 +537,12 @@ class SimpleDbTest {
     }
 
     // 테스트 추가
+    //connection 풀을 쓰레드 별로 받더라도
+    //같은 DB row에 접근한다면 동시성문제가 생길수있다.
+    //JDBC의 기본 설정은  Auto-Commit = true 이기때문에
+    //sql구문이 하나의 트랜잭션 단위가 된다.
     @Test
-    @DisplayName("use in multi threading : 제모")
+    @DisplayName("use in multi threading : id=1 제목수정")
     public void t020() throws InterruptedException {
         // 쓰레드 풀의 크기를 정의합니다.
         int numberOfThreads = 10;
