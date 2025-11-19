@@ -81,56 +81,6 @@ public class SimpleDb {
         }
     }
 
-    public List<Map<String, Object>> sss(Sql _sql) {
-        List<Map<String, Object>> data = new ArrayList<>();
-        Connection conn = getCurrentThreadConnection();
-        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            List<Object> _sqlParams = _sql.get_values();
-            for (int i = 0; i < _sqlParams.size(); i++) {
-                setParam(pstmt, i + 1, _sqlParams.get(i));
-            }
-
-            ResultSet rs = pstmt.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    row.put(rsmd.getColumnName(i), rs.getObject(i));
-                }
-                data.add(row);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            close();
-        }
-        return data;
-    }
-
-
-    public Map<String, Object> selectRow(Sql _sql) {
-        Map<String, Object> row = new HashMap<>();
-        Connection conn = getCurrentThreadConnection();
-        try (PreparedStatement pstmt = conn.prepareStatement(_sql.get_sql())) {
-
-            ResultSet rs = pstmt.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            if (rs.next()) {
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    row.put(rsmd.getColumnName(i), rs.getObject(i));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            close();
-        }
-        return row;
-    }
-
     public List<Map<String, Object>> selectRows(Sql _sql) {
         List<Map<String, Object>> data = new ArrayList<>();
         Connection conn = getCurrentThreadConnection();

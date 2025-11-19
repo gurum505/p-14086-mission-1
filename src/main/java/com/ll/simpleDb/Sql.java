@@ -21,16 +21,9 @@ public class Sql {
         this._values = new ArrayList<>();
     }
 
-    public Sql append(String sql) {
-        if (!_sql.isEmpty() && !sql.startsWith(" ") && !_sql.toString().endsWith(" ")) {
-            _sql.append(" ");
-        }
-        _sql.append(sql);
-        return this;
-    }
-
     public Sql append(String sql, Object... params) {
-        append(sql);
+        _sql.append(" ");
+        _sql.append(sql);
         if (params != null) {
             this._values.addAll(Arrays.asList(params));
         }
