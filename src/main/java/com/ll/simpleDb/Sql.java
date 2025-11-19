@@ -59,14 +59,11 @@ public class Sql {
     }
 
     public Map<String, Object> selectRow() {
-        return simpleDb.selectRow(this);
+        return simpleDb.selectRows(this).getFirst();
     }
 
     public <T> T selectRow(Class<T> cls) {
-        if (cls == Article.class) {
-            return cls.cast(new Article(simpleDb.selectRow(this)));
-        }
-        return null;
+        return selectRows(cls).getFirst();
     }
 
     public List<Map<String, Object>> selectRows() {
